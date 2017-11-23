@@ -22,13 +22,24 @@ function restrict(req,res,next) {
     var flag = false;
     var userName = req.query.user;
     console.log(userName);
-    redisClient.hget("nodejs:user:AllUsers","yanyan2",function(err,value){
+    if(!userName){
+        res.end("no user");
+        return;
+    }
+    redisClient.hget("nodejs:user:AllUsers",userName,function(err,value){
         console.log("ok");
         console.log(err,value);
+        if(err){
+            res.end(err);
+        }else{
+            var user = JSON.parse(value);
+            var cookieNameStr = "name="+user.name;
+            res.setHeader("Set-Cookie",cookieNameStr);
+            next();
+        }
     });
-    res.setHeader("Set-Cookie","foo=ad");
 
-    res.end();
+
     // if(flag){
     //     next();
     // }else{
